@@ -1,0 +1,85 @@
+<body></body>
+
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+
+<style>
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .pulsing {
+    animation: pulse 1s infinite ease-in-out;
+  }
+
+</style>
+
+<script>
+  /* global nn*/
+  
+  nn.on('load', () => {
+    const audioFiles = [
+      'Argentina.mp3',
+      'Canada.mp3',
+      'Chile.mp3'
+    ]
+
+    let index = 0
+  
+  nn.get('body').css({
+    backgroundColor: 'rgb(20, 20, 20)',
+    display: 'grid',
+    placeItems: 'center',
+    height: '100vh',
+    margin: 0
+  })
+    
+  const audio = new Audio()
+  audio.controls = true
+  audio.style.display = 'none'
+  document.body.appendChild(audio)
+
+  const instructionText = nn.create('div')
+    .set({ text: 'Click the globe to hear words from many nations' })
+    .css({
+      color: 'white',
+      fontSize: '20px',
+      fontFamily: 'sans-serif',
+      textAlign: 'center',
+      marginBottom: '20px',
+      maxWidth: '80%',
+    })
+    .addTo('body')
+  
+  const playGif = nn.create('img')
+    .set({
+      src: 'spinning_earth.gif',
+      alt: 'Click to Play',
+    })
+    .css({
+      width: '150px',
+      cursor: 'pointer'
+    })
+    .on('click', () => {
+      audio.src = audioFiles[index]
+      audio.play().catch(err => console.error('Playback failed:', err))
+      playGif.set({ class: 'pulsing' })
+      instructionText.remove()
+    })
+    .addTo('body')
+
+  audio.addEventListener('ended', () => {
+    index++
+    if (index < audioFiles.length) {
+      audio.src = audioFiles[index]
+      audio.play()
+    } else {
+      console.log('All clips played.')
+      playGif.set({ class: '' })
+    }
+  })
+})
+
+</script>
