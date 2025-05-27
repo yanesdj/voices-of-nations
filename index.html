@@ -1,150 +1,413 @@
-<style>
-  @keyframes pulse {
-    0%   { transform: scale(1); opacity: 1; }
-    50%  { transform: scale(1.1); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .pulsing {
-    animation: pulse 1s infinite ease-in-out;
-  }
-</style>
-
-<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
-<script>
-/* global nn */  
-  
-nn.on('load', () => {
-  const audioFiles = [
-    'Argentina.mp3',
-    'Canada.mp3',
-    'Chile.mp3',
-    'China.mp3',
-    'Colombia.mp3',
-    'Egypt.mp3',
-    'France.mp3',
-    'Germany.mp3',
-    'Georgia.mp3',
-    'Greece.mp3',
-    'Hungary.mp3',
-    'India.mp3',
-    'Ireland.mp3',
-    'Italy.mp3',
-    'Japan.mp3',
-    'Lebanon.mp3',
-    'Mexico.mp3',
-    'Nigeria.mp3',
-    'Norway.mp3',
-    'Poland.mp3',
-    'Russia.mp3',
-    'Spain.mp3',
-    'Sweden.mp3',
-    'UK.mp3',
-    'USA.mp3'
-  ]
-  
-  const textLines = [
-    'The universe (which others call the Library) is composed of an indefinite and perhaps infinite number of hexagonal galleries, with vast airshafts between, surrounded by very low railings. ~ Jorge Luis Borges, The Library of Babel, Argentina',
-    "Mrs. Rachel Lynde lived just where the Avonlea main road dipped down into a little hollow, fringed with alders and ladies' eardrops and traversed by a brook that had its source away back in the woods of the old Cuthbert place. . . . ~ Lucy Maud Montgomery, Anne of Green Gables, Canada",
-    'Barrabás came to us by the sea, the child Clara wrote in her delicate calligraphy. ~ Isabel Allende, The House of Spirits, Chile',
-    'When I was ten years younger than I am now, I had the carefree job of going to the countryside to collect popular folk songs. ~ Yu Hua, To Live, China',
-    'Many years later, as he faced the firing squad, Colonel Aureliano Buendía was to remember that distant afternoon when his father took him to discover ice. ~ Gabriel García Márquez, One Hundred Years of Solitude, Colombia',
-    'She woke at midnight. ~ Naguib Mahfouz, Palace Walk, Egypt',
-    'Maman died today. ~ Albert Camus, The Stranger, France',
-    'An ordinary young man was on his way from his hometown of Hamburg to Davos-Platz in the canton of Graubünden. ~ Thomas Mann, The Magic Mountain, Germany',
-    "Who created the firmament, by that mighty power made beings inspired from on high, with souls, celestial; to us men He has given the world, infinite in variety--we possess it; from Him is every monarch in His likeness. ~ Shota Rustaveli, The Knight in the Panther's Skin, Georgia",
-    'Sing, O goddess, the anger of Achilles son of Peleus, that brought countless ills upon the Achaeans. ~ Homer, The Iliad, Greece',
-    'One morning near the end of October not long before the first drops of the mercilessly long autumn rains began to fall on the cracked and saline soil on the western side of the estate (later the stinking yellow sea of mud would render footpaths impassable and put the town too beyond reach) Futaki woke to hear bells. ~ Krasznahorkai László, Sátántangó, Hungary',
-    'Honour first Nārāyaṇa, and Nara, the most excellent of men; honour too Sarasvatī the goddess; then proclaim the Tale of Victory! ~ Vyāsa, The Mahābhārata, India',
-    'Once upon a time and a very good time it was there was a moocow coming down a long road and this moocow that was coming down a long road met a nicens little boy named baby tuckoo. . . . ~ James Joyce, A Portrait of the Artist as a Young Man, Ireland',
-    'NUNC ET IN HORA MORTIS NOSTRAE. Amen. ~ Giuseppe Tomasi di Lampedusa, The Leopard, Italy',
-    'In the reign of a certain Emperor, whose name is unknown to us, there was, among the Niogo and Kôyi of the Imperial Court, one who, though she was not of high birth, enjoyed the full tide of Royal favour. ~ Murasaki Shikibu, The Tale of Genji, Japan',
-    'Almustafa, the chosen and the beloved, who was a dawn unto his own day, had waited twelve years in the city of Orphalese for his ship that was to return and bear him back to the isle of his birth. ~ Gibran Khalil Gibran, The Prophet, Lebanon',
-    'I came to Comala because I had been told that my father, a man named Pedro Páramo, lived there. ~ Juan Rulfo, Pedro Páramo, Mexico',
-    'Okonkwo was well known throughout the nine villages and even beyond. ~ Chinua Achebe, Things Fall Apart, Nigeria',
-    'It was during the time I wandered about and starved in Christiana; Christiania, this singular city, from which no man departs without carrying away the traces of his sojourn there. ~ Knut Hamsun, Hunger, Norway',
-    'Once swallowed, the piece of paper lodges in her esophagus, near her heart. ~ Olga Tokarczuk, The Books of Jacob, Poland',
-    'Happy families are all alike; every unhappy family is unhappy in its own way. ~ Leo Tolstoy, Anna Karenina, Russia',
-    'Somewhere in La Mancha, in a place whose name I do not care to remember, a gentleman lived not long ago, one of those who has a lance and ancient shield on a shelf and keeps a skinny nag and a greyhound for racing. ~ Miguel de Cervantes, Don Quixote, Spain',
-    'Many restless men rowed north from Skania with Bue and Vagn, and found ill fortune at Jörundfjord; others marched with Styrbjörn to Uppsala and died there with him. ~ Frans G. Bengtsson, The Long Ships, Sweden',
-    'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. ~ Jane Austen, Pride and Prejudice, UK',
-    "In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. ~ F. Scott Fitzgerald, The Great Gatsby, USA"
-  ]
-
-  let index = 0
-
-  const audio = new Audio()
-  audio.controls = true
-  audio.style.display = 'none'
-  document.body.appendChild(audio)
-
-  const container = nn.create('div')
-    .css({
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh',
-      gap: '20px'
-    })
-    document.body.appendChild(container)
-  
-  const caption = document.createElement('div')
-  caption.textContent = ''
-  caption.style.color = 'white'
-  caption.style.fontSize = '18px'
-  caption.style.fontFamily = 'Times New Roman, serif'
-  caption.style.textAlign = 'center'
-  caption.style.maxWidth = '80%'
-  caption.style.padding = '10px'
-  container.appendChild(caption)
-
-  const introText = document.createElement('div')
-  introText.textContent = 'Click on the globe to catch a glimpse of stories from around the world'
-  introText.style.color = 'white'
-  introText.style.fontSize = '18px'
-  introText.style.fontFamily = 'Times New Roman, serif'
-  introText.style.textAlign = 'center'
-  introText.style.maxWidth = '80%'
-  introText.style.opacity = '1'
-  introText.style.transition = 'opacity 1s ease'
-  container.appendChild(introText)
-  
-  const playGif = nn.create('img')
-    .set({
-      src: 'rotating_earth.gif',
-      alt: 'Click to Play'
-    })
-    .css({
-      width: '150px',
-      cursor: 'pointer'
-    })
-    .on('click', () => {
-      audio.src = audioFiles[index]
-      caption.textContent = textLines[index]
-      audio.play().catch(err => console.error('Playback failed:', err))
-      playGif.set({ class: 'pulsing' })
-      introText.style.opacity = '0'
-      setTimeout(() => introText.remove(), 1000)
-    })
-    .addTo(container)
-
-  audio.addEventListener('ended', () => {
-    index++
-    if (index < audioFiles.length) {
-      audio.src = audioFiles[index]
-      caption.textContent = textLines[index]
-      audio.play()
-    } else {
-      playGif.set({ class: '' })
-      caption.textContent = ''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voices of Nations</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
     }
-  })
 
-  nn.get('body').css({
-    backgroundColor: 'rgb(20, 20, 20)',
-    margin: 0
-  })
-})
+    .screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      transition: opacity 1s;
+    }
 
-</script>
+    #startScreen h1 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    #globeGif {
+      width: 200px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    #globeGif:hover {
+      transform: scale(1.1);
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #playButton {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid white;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 50px;
+      backdrop-filter: blur(5px);
+    }
+
+    #imageContainer {
+      height: 250px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    #currentImage {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+
+    #currentImage.show {
+      opacity: 1;
+    }
+
+    #textDisplay {
+      position: fixed;
+      bottom: 10%;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: 80%;
+      text-align: center;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      opacity: 0;
+      transition: opacity 1s;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    #textDisplay.show {
+      opacity: 1;
+    }
+    
+    .quote-container {
+      max-width: 80%;
+      margin: 0 auto;
+    }
+
+    .literary-quote {
+      font-size: 1.8rem;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+
+    .quote-attribution {
+      font-size: 1.2rem;
+      text-align: right;
+      margin-bottom: 2rem;
+      opacity: 0.8;
+    }
+
+    .start-prompt {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .start-prompt p {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="startScreen" class="screen">
+  <div class="quote-container">
+    <p class="literary-quote">"A reader lives a thousand lives before he dies.<br>The man who never reads lives only one."</p>
+    <p class="quote-attribution">— George R.R. Martin</p>
+    <div class="start-prompt">
+      <img id="globeGif" src="rotating_earth.gif" alt="Spinning Globe">
+      <p>Click the globe to begin</p>
+    </div>
+  </div>
+</div>
+
+<div id="playerScreen" class="screen hidden">
+  <div id="imageContainer">
+    <img id="currentImage" src="" alt=""/>
+  </div>
+  <div id="textDisplay"></div>
+</div>
+
+  <button id="playButton" class="hidden">⏸ Pause</button>
+
+  <script>
+    const literatureData = [
+  {
+    country: "Argentina",
+    audio: "Argentina.mp3",
+    image: "Argentina.png",
+    text: "“The universe (which others call the Library) is composed of an indefinite and perhaps infinite number of hexagonal galleries, with vast airshafts between, surrounded by very low railings.” — Jorge Luis Borges, The Library of Babel"
+  },
+  {
+    country: "Sweden",
+    audio: "Sweden.mp3",
+    image: "Sweden.png",
+    text: "“Many restless men rowed north from Skania with Bue and Vagn, and found ill fortune at Jörundfjord; others marched with Styrbjörn to Uppsala and died there with him.” — Frans G. Bengtsson, The Long Ships"
+  },
+  {
+    country: "Mexico",
+    audio: "Mexico.mp3",
+    image: "Mexico.png",
+    text: "“I came to Comala because I had been told that my father, a man named Pedro Páramo, lived there.” — Juan Rulfo, Pedro Páramo"
+  },
+  {
+    country: "Norway",
+    audio: "Norway.mp3",
+    image: "Norway.png",
+    text: "“It was during the time I wandered about and starved in Christiana; Christiania, this singular city, from which no man departs without carrying away the traces of his sojourn there.” — Knut Hamsun, Hunger"
+  },
+  {
+    country: "USA",
+    audio: "USA.mp3",
+    image: "USA.png",
+    text: "“In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.” — F. Scott Fitzgerald, The Great Gatsby"
+  },
+  {
+    country: "Canada",
+    audio: "Canada.mp3",
+    image: "Canada.png",
+    text: "“Mrs. Rachel Lynde lived just where the Avonlea main road dipped down into a little hollow, fringed with alders and ladies' eardrops and traversed by a brook that had its source away back in the woods of the old Cuthbert place. . . .” — Lucy Maud Montgomery, Anne of Green Gables"
+  },
+  {
+    country: "Egypt",
+    audio: "Egypt.mp3",
+    image: "Egypt.png",
+    text: "“She woke at midnight.” — Naguib Mahfouz, Palace Walk"
+  },
+  {
+    country: "Germany",
+    audio: "Germany.mp3",
+    image: "Germany.png",
+    text: "“An ordinary young man was on his way from his hometown of Hamburg to Davos-Platz in the canton of Graubünden.” — Thomas Mann, The Magic Mountain"
+  },
+  {
+    country: "Colombia",
+    audio: "Colombia.mp3",
+    image: "Colombia.png",
+    text: "“Many years later, as he faced the firing squad, Colonel Aureliano Buendía was to remember that distant afternoon when his father took him to discover ice.” — Gabriel García Márquez, One Hundred Years of Solitude"
+  },
+  {
+    country: "Hungary",
+    audio: "Hungary.mp3",
+    image: "Hungary.png",
+    text: "“One morning near the end of October not long before the first drops of the mercilessly long autumn rains began to fall on the cracked and saline soil on the western side of the estate (later the stinking yellow sea of mud would render footpaths impassable and put the town too beyond reach) Futaki woke to hear bells.” — Krasznahorkai László, Sátántangó"
+  },
+  {
+    country: "Japan",
+    audio: "Japan.mp3",
+    image: "Japan.png",
+    text: "“In the reign of a certain Emperor, whose name is unknown to us, there was, among the Niogo and Kôyi of the Imperial Court, one who, though she was not of high birth, enjoyed the full tide of Royal favour.” — Murasaki Shikibu, The Tale of Genji"
+  },
+  {
+    country: "Spain",
+    audio: "Spain.mp3",
+    image: "Spain.png",
+    text: "“Somewhere in La Mancha, in a place whose name I do not care to remember, a gentleman lived not long ago, one of those who has a lance and ancient shield on a shelf and keeps a skinny nag and a greyhound for racing.” — Miguel de Cervantes, Don Quixote"
+  },
+  {
+    country: "China",
+    audio: "China.mp3",
+    image: "China.png",
+    text: "“When I was ten years younger than I am now, I had the carefree job of going to the countryside to collect popular folk songs.” — Yu Hua, To Live"
+  },
+  {
+    country: "Lebanon",
+    audio: "Lebanon.mp3",
+    image: "Lebanon.png",
+    text: "“Almustafa, the chosen and the beloved, who was a dawn unto his own day, had waited twelve years in the city of Orphalese for his ship that was to return and bear him back to the isle of his birth.” — Gibran Khalil Gibran, The Prophet"
+  },
+  {
+    country: "Poland",
+    audio: "Poland.mp3",
+    image: "Poland.png",
+    text: "“Once swallowed, the piece of paper lodges in her esophagus, near her heart.” — Olga Tokarczuk, The Books of Jacob"
+  },
+  {
+    country: "France",
+    audio: "France.mp3",
+    image: "France.png",
+    text: "“Maman died today.” — Albert Camus, The Stranger"
+  },
+  {
+    country: "Ireland",
+    audio: "Ireland.mp3",
+    image: "Ireland.png",
+    text: "“Once upon a time and a very good time it was there was a moocow coming down a long road and this moocow that was coming down a long road met a nicens little boy named baby tuckoo. . . .” — James Joyce, A Portrait of the Artist as a Young Man"
+  },
+  {
+    country: "India",
+    audio: "India.mp3",
+    image: "India.png",
+    text: "“Honour first Nārāyaṇa, and Nara, the most excellent of men; honour too Sarasvatī the goddess; then proclaim the Tale of Victory!” — Vyāsa, The Mahābhārata"
+  },
+  {
+    country: "Chile",
+    audio: "Chile.mp3",
+    image: "Chile.png",
+    text: "“Barrabás came to us by the sea, the child Clara wrote in her delicate calligraphy.” — Isabel Allende, The House of Spirits"
+  },
+  {
+    country: "Russia",
+    audio: "Russia.mp3",
+    image: "Russia.png",
+    text: "“Happy families are all alike; every unhappy family is unhappy in its own way.” — Leo Tolstoy, Anna Karenina"
+  },
+  {
+    country: "Georgia",
+    audio: "Georgia.mp3",
+    image: "Georgia.png",
+    text: "“Who created the firmament, by that mighty power made beings inspired from on high, with souls, celestial; to us men He has given the world, infinite in variety--we possess it; from Him is every monarch in His likeness.” — Shota Rustaveli, The Knight in the Panther's Skin"
+  },
+  {
+    country: "Nigeria",
+    audio: "Nigeria.mp3",
+    image: "Nigeria.png",
+    text: "“Okonkwo was well known throughout the nine villages and even beyond.” — Chinua Achebe, Things Fall Apart"
+  },
+  {
+    country: "Italy",
+    audio: "Italy.mp3",
+    image: "Italy.png",
+    text: "“NUNC ET IN HORA MORTIS NOSTRAE. Amen.” — Giuseppe Tomasi di Lampedusa, The Leopard"
+  },
+  {
+    country: "Greece",
+    audio: "Greece.mp3",
+    image: "Greece.png",
+    text: "“Sing, O goddess, the anger of Achilles son of Peleus, that brought countless ills upon the Achaeans.” — Homer, The Iliad"
+  },
+  {
+    country: "UK",
+    audio: "UK.mp3",
+    image: "UK.png",
+    text: "“It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.” — Jane Austen, Pride and Prejudice"
+  },
+];
+
+    const startScreen = document.getElementById("startScreen");
+    const playerScreen = document.getElementById("playerScreen");
+    const globeGif = document.getElementById("globeGif");
+    const playButton = document.getElementById("playButton");
+    const currentImage = document.getElementById("currentImage");
+    const textDisplay = document.getElementById("textDisplay");
+
+    let currentIndex = 0;
+    let currentAudio = null;
+    let isPlaying = false;
+
+    playButton.classList.add("hidden");
+
+    globeGif.addEventListener("click", () => {
+      startScreen.style.opacity = "0";
+      
+      setTimeout(() => {
+        startScreen.classList.add("hidden");
+        playerScreen.classList.remove("hidden");
+        playerScreen.style.opacity = "1";
+        playButton.classList.remove("hidden");
+        
+        playCurrentEntry();
+      }, 1000);
+    });
+
+    playButton.addEventListener("click", () => {
+      if (isPlaying) {
+        currentAudio.pause();
+        isPlaying = false;
+        playButton.textContent = "▶ Resume";
+      } else {
+        currentAudio.play();
+        isPlaying = true;
+        playButton.textContent = "⏸ Pause";
+      }
+    });
+
+    function preloadImages() {
+      literatureData.forEach(entry => {
+        const img = new Image();
+        img.src = entry.image;
+      });
+    }
+    preloadImages();
+
+    function playCurrentEntry() {
+      if (currentIndex >= literatureData.length) {
+        textDisplay.textContent = "Journey complete! Refreshing...";
+        setTimeout(() => {
+          location.reload();
+        }, 3000);
+        return;
+      }
+
+      const currentEntry = literatureData[currentIndex];
+
+      currentImage.classList.remove("show");
+      textDisplay.classList.remove("show");
+
+      setTimeout(() => {
+        currentImage.style.visibility = "hidden";
+
+        currentImage.src = currentEntry.image;
+        currentImage.alt = currentEntry.country;
+        textDisplay.textContent = currentEntry.text;
+
+        currentImage.onload = () => {
+          currentImage.style.visibility = "visible";
+          currentImage.classList.add("show");
+          textDisplay.classList.add("show");
+        };
+
+        if (currentAudio) {
+          currentAudio.pause();
+        }
+
+        currentAudio = new Audio(currentEntry.audio);
+        currentAudio.play();
+        isPlaying = true;
+        playButton.textContent = "⏸ Pause";
+
+        currentAudio.onended = () => {
+          currentImage.classList.remove("show");
+          textDisplay.classList.remove("show");
+
+          setTimeout(() => {
+            currentIndex++;
+            playCurrentEntry();
+          }, 1000);
+        };
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
